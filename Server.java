@@ -65,11 +65,13 @@ class ServerThread extends Thread {
                 if(clientMessage.substring(0, 4).equals("name")) {
                     // whatever comes after "name-" is the client name
                 
+                    // if the name is left empty, then we give it a default name.
                     if(clientMessage.substring(5).length()>0 && !clientMessage.substring(5).equals(" ")) 
                         clientName = clientMessage.substring(5);
 
                     System.out.println("Connected to Client: " + clientName);
                 }
+                
                 // handling an exit
                 else if(clientMessage.equals("exit")) {
                     // send an "exit" message back to the client
