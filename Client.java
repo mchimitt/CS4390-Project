@@ -7,7 +7,17 @@ public class Client {
         String message;
         String response;
 
-        Socket clientSocket = new Socket("127.0.0.1", 6789);
+        // default ip address and port number
+        String ip_addr = "127.0.0.1";
+        int port_num = 6789;
+
+        if(argv.length >=2 && argv[0] != null && argv[1] != null) {
+            ip_addr = argv[0];
+            port_num = Integer.parseInt(argv[1]);
+        }
+
+
+        Socket clientSocket = new Socket(ip_addr, port_num);
 
         // creating the streams
 

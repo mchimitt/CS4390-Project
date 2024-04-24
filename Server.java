@@ -8,10 +8,18 @@ public class Server {
     public static void main(String argv[]) throws Exception
     {
 
+        int port_num = 6789;
+
+        // Specify port number. if no port number is specified, then uses default of 6789.
+        if(argv.length > 0 && argv[0] != null) {
+            port_num = Integer.parseInt(argv[0]);
+        }
+
+
         int id = 1;
 
         // creating the welcome socket
-        ServerSocket welcomeSocket = new ServerSocket(6789);
+        ServerSocket welcomeSocket = new ServerSocket(port_num);
 
         System.out.println("\nServer is Running\n");
 
@@ -120,7 +128,7 @@ class ServerThread extends Thread {
                     endTime = endTimeObj.format(format);
 
                     // disconnect from the client
-                    String disconnect = "Disconnecting from Client: " + clientName + " : Connected for " + (endDuration - startDuration) + " seconds\nConnection began at " + startTime + " and terminated at " + endTime;
+                    String disconnect = "\nDisconnecting from Client: " + clientName + " : Connected for " + (endDuration - startDuration) + " seconds\nConnection began at " + startTime + " and terminated at " + endTime;
                     System.out.println(disconnect + "\n");
                     AddLineToLog(disconnect);
                     
@@ -131,6 +139,7 @@ class ServerThread extends Thread {
                     fw.write(log);
                     fw.close();
                     
+                    System.out.println(clientName + "_log.txt file saved to directory.\n");
 
                     // closing connections
                     inFromClient.close();
@@ -139,6 +148,7 @@ class ServerThread extends Thread {
 
                     // break out of the loop to let the thread finish.
                     break;
+
                 } else {
                     // printing the message received from the client
                     // FOR DEBUGGING - GET RID OF THIS LATER
@@ -160,7 +170,6 @@ class ServerThread extends Thread {
 
                 // Logging
                 AddToLog(clientMessage, responseMessage);
-                System.out.println(log);
                 
             }
 

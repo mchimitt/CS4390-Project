@@ -1,0 +1,11 @@
+Connected to Client: chimitt
+Request From chimitt:  name-chimitt
+Server Response:  name-chimitt
+
+Request From chimitt:  hello
+Server Response:  hello
+
+Request From chimitt:  exit
+Server Response:  exit
+Disconnecting from Client: chimitt : Connected for 38 seconds
+Connection began at 21:12:15 and terminated at 21:12:53
