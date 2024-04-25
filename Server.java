@@ -137,11 +137,16 @@ class ServerThread extends Thread {
                     AddLineToLog(disconnect);
                     
 
+                    // create the logs directory if it doesn't already exist
+                    File dir = new File(".\\logs\\");
+                    dir.mkdir();
+
                     // download the log file!
-                    File file = new File(clientName + "_log");
+                    File file = new File(".\\logs\\" + clientName + "_log");
                     FileWriter fw = new FileWriter(file);
                     fw.write(log);
                     fw.close();
+
                     
                     System.out.println(clientName + "_log.txt file saved to directory.\n");
 

@@ -30,6 +30,7 @@ public class Client {
 
         System.out.print("Enter Name: ");
         String name = userInput.readLine();
+        System.out.println("\nName: " + name);
         System.out.println("\n");
 
         System.out.println("Connected to Server.");
@@ -47,6 +48,8 @@ public class Client {
             // getting user input
             message = userInput.readLine();
             
+            System.out.println("\n\nSending to Server: " + message);
+
             // sending the user input to the server.
             outToServer.writeBytes(message + '\n');
 
