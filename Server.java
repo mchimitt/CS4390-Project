@@ -3,11 +3,12 @@ import java.net.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
+import java.util.Stack;
+
 
 public class Server {
     public static void main(String argv[]) throws Exception
     {
-
         int port_num = 6789;
 
         // Specify port number. if no port number is specified, then uses default of 6789.
@@ -62,6 +63,7 @@ class ServerThread extends Thread {
     String clientName = "";
     
     String clientMessage;
+    String responseMessage = "";
 
     // keeps track of our log file
     String log = "";
@@ -106,7 +108,8 @@ class ServerThread extends Thread {
                     if(clientMessage.substring(5).length()>0 && !clientMessage.substring(5).equals(" ")) 
                         clientName = clientMessage.substring(5);
 
-                    String connected = "Connected to Client: " + clientName;
+                    String connected = "Connected to Client: " + clientName + "\nConnection began at " + startTime + "\n";
+                    responseMessage = "Connected\n";
                     System.out.println(connected);
                     AddLineToLog(connected);
                 }
@@ -117,6 +120,7 @@ class ServerThread extends Thread {
                     // send an "exit" message back to the client
                     outToClient.writeBytes("exit");
 
+                    // add the message and response to the log
                     AddToLog(clientMessage, "exit");
 
                     // Determining the end time in order to display the length of the connection
@@ -150,21 +154,22 @@ class ServerThread extends Thread {
                     break;
 
                 } else {
+                    
                     // printing the message received from the client
                     // FOR DEBUGGING - GET RID OF THIS LATER
                     System.out.println(clientName + ": " + clientMessage);
                     
-
-
-
-                    // REPLACE THIS WITH THE MATH PROTOCOL STUFF!!
-
-                    
-
+                    // if the message is in the proper format, calculate the equation and set the responseMessage to be the result
+                    if(isPrefixNotation(clientMessage)) {
+                        responseMessage = "" + (solvePrefixEquation(clientMessage) + "\n");
+                        System.out.println("Responding to " + clientName + ": " + responseMessage);
+                    } 
+                    // otherwise, return error-0, which will indicate to the client that the message sent was in improper form
+                    else {
+                        responseMessage = "Error-0\n";
+                    }
                 }
 
-                // Creating the response message
-                String responseMessage = clientMessage + '\n';
                 // sending the response message.
                 outToClient.writeBytes(responseMessage);
 
@@ -204,6 +209,157 @@ class ServerThread extends Thread {
     // adds a single line to the log file
     public void AddLineToLog(String line) {
         log = log + (line + "\n");
+    }
+
+
+    //Solves the prefix equation give as String
+    //Can perform arithmetic operations(+,-,*,/) on integers in prefix notation
+    public static int solvePrefixEquation(String input){
+
+        Stack<Integer> stack = new Stack<Integer>();
+
+        //Iterate through the string backwards
+        for(int i = input.length()-1; i>=0; i--)
+        {
+            char currChar = input.charAt(i);
+
+            //Skip the current char if it is a space
+            if(currChar == ' ')
+                continue;
+
+            //Operator encountered (Not a digit)
+            if(!(currChar >= '0' && currChar <= '9')){
+
+                //Perform the given operation with the top two values on the stack
+                int op1 = (int)stack.pop();
+                int op2 = (int)stack.pop();
+
+                //Switch Case to determine operator
+                switch(currChar){
+                    case '+':
+                        stack.push(op1+op2);
+                        break;
+                    case '-':
+                        stack.push(op1-op2);
+                        break;
+                    case '*':
+                        stack.push(op1*op2);
+                        break;
+                    case '/':
+                        stack.push(op1/op2);
+                        break;
+                }
+                continue;
+            }
+
+            //Digit Encountered
+            //Number can be greater than 1 digit
+            //Variables for calculating
+            int total = 0;
+            int multiplier = 1;
+
+            //While the current char is a digit (Not a space)
+            while(currChar >= '0' && currChar <= '9'|| currChar == '-' ){
+
+                //Negative symbol reached only if there was a digit to the right of it
+                if(currChar == '-'){
+
+                    //If negative symbol, make total negative
+                    total *= -1;
+                    break;
+                }
+                //Sum the total with the
+                //product of the integer value of the current char and the current multiplier(1, 10, 100...)
+                total += (int)(currChar-'0') * multiplier;
+
+                //Multiply by 10 for the next digit to the left
+                multiplier *= 10;
+
+                //Set the current char to the next on the left
+                currChar = input.charAt(--i);
+            }
+
+            //Push the value to the stack
+            stack.push(total);
+        }
+
+        //Return the final value in the stack
+        return stack.pop();
+    }
+
+
+
+    //Checks to see whether a given String is in prefix notation
+    //For (+,-,*,/) and integers
+    //1 or more spaces must seperate each token
+    //Ignores leading and trailing whitespace
+    public static boolean isPrefixNotation(String input){
+
+        //Variable to keep track of the number of operands and operators
+        int operatorCount=0;
+        int operandCount=0;
+
+        //If input is an empty string return false
+        if(input.length() == 0)
+            return false;
+
+        //Iterate thorugh the string backwards
+        int i = input.length()-1;
+        char currChar = input.charAt(i);
+        while(true){
+
+            //Operator Encountered
+            if(currChar == '+' || currChar == '-' || currChar == '*' || currChar == '/'){
+
+                //Increment the operator total
+                operatorCount++;
+
+                //If it is the first operator break
+                if(i==0){break;}
+
+                //If it is not the first operator move to next left position (Should be a space)
+                currChar = input.charAt(--i);
+            }
+
+            //Operand Encountered
+            else if(currChar >= '0' && currChar <= '9'){
+
+                //While the current char is a number
+                //The smallest possible index position for a number is 2
+                while(currChar >= '0' && currChar <= '9' && i>=2){
+
+                    //Move to next left position (Should be space or negative sign)
+                    currChar = input.charAt(--i);
+                }
+
+                //After moved through whole number, check if there is a negative sign
+                if(currChar == '-'){
+
+                    //Move to next left position (Should be a space)
+                    currChar = input.charAt(--i);
+
+                }
+
+                //Increment the operand total
+                operandCount++;
+            }
+
+            //If current char is not a space
+            //Or if the number of operators exceeds the number of operands
+            if(currChar != ' ' || operatorCount >= operandCount && operatorCount > 0)
+                return false;
+
+            //For the case of leading zeros
+            if(i==0){break;}
+
+            //Move to next left position
+            currChar = input.charAt(--i);
+
+        }
+
+        //Should be one more operand then operator for prefix position
+        //Should be atleast 1 operator in the function
+        return operandCount == operatorCount + 1 && operatorCount > 0;
     }
 
 }

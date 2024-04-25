@@ -33,13 +33,16 @@ public class Client {
         System.out.println("\n");
 
         System.out.println("Connected to Server.");
-        System.out.println("Enter \"exit\" to disconnect.");
         
         outToServer.writeBytes("name-" + name + '\n');
         response = inFromServer.readLine();
 
         // main loop of the client: send message, receive a response.
         while(true) {
+            System.out.println("\n");
+
+            System.out.println("Enter \"exit\" to disconnect.\nEnter Math Equations in Prefix Notation.\n(e.g. + 2 3)");
+            System.out.print(">> ");
 
             // getting user input
             message = userInput.readLine();
@@ -59,10 +62,14 @@ public class Client {
             // exit response
             if(response.equals("exit")) {
                 // disconnect from the server
-                System.out.println("Disconnecting from the Server.\nExiting.");
+                System.out.println("Disconnecting from the Server.\n\nExiting");
                 // client socket closes and break out of the while loop to let the program finish.
                 clientSocket.close();
                 break;
+            } 
+            // if response is error, that means incorrect prefix
+            else if(response.equals("error-0")) {
+                System.out.println("Server Found Incorrect Notation.\nFormat should be in prefix notation, e.g. \"+ 1 1\" = 2");
             }
 
         }
